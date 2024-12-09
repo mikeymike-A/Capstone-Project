@@ -5,7 +5,6 @@
 let shotSound;
 let state = 'title';
 
-
 let direction = 0;
 let TILE_SIZE = 40; // Size of each tile
 let ROWS = 15;      // Number of rows in each board
