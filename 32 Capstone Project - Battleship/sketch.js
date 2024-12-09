@@ -27,7 +27,7 @@ let currentCol = -1;
 
 //Represent all available tiles for placement of ships
 let availableTiles = [];
-
+angleMode(DEGREES);
 
 //Array to push all ships to the grid to be placed by the player
 let playerShips = [];
@@ -47,7 +47,7 @@ let AIShips = [];
 // ];
 function loadShips() {
   directionChange();
-  playerShips.push(new Ship())
+  playerShips.push(new Ship());
 
 }
 class Ship {
@@ -94,10 +94,10 @@ function setup() {
   createCanvas(1600, 800); // Adjust canvas size to fit both boards
 
   // Initialize player and AI grids
-  for (var row = 0; row < ROWS; row++) {
+  for (let row = 0; row < ROWS; row++) {
     playerGrid[row] = [];
     aiGrid[row] = [];
-    for (var col = 0; col < COLS; col++) {
+    for (let col = 0; col < COLS; col++) {
       playerGrid[row][col] = 0; // Empty tile
       aiGrid[row][col] = 0;     // Empty tile
     }
@@ -115,7 +115,8 @@ function draw() {
 
   if (state === "title") {
     renderTitleScreen();
-  } else if (state === "gameplay") {
+  }
+  else if (state === "gameplay") {
     renderBoard(playerGrid, playerBoardX, playerBoardY); // Player's board
     renderBoard(aiGrid, aiBoardX, aiBoardY);             // AI's board
     determineActiveSquare();
@@ -130,7 +131,7 @@ function draw() {
 
 
 
-    text((mouseX + ", " + mouseY), mouseX, mouseY); //Co-ord debugging
+    text(mouseX + ", " + mouseY, mouseX, mouseY); //Co-ord debugging
   }
 
 }
@@ -148,8 +149,8 @@ function renderTitleScreen() {
 }
 
 function renderBoard(grid, xOffset, yOffset) {
-  for (var row = 0; row < ROWS; row++) {
-    for (var col = 0; col < COLS; col++) {
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
       // Set the default tile color
       fill(220); // Default gray color
       stroke(0); // Black tile border
@@ -157,9 +158,11 @@ function renderBoard(grid, xOffset, yOffset) {
       // Highlight tile if it's occupied (example: 1 for a ship)
       if (grid[row][col] === 1) {
         fill(100); // Example color for ships
-      } else if (grid[row][col] === 2) {
+      }
+      else if (grid[row][col] === 2) {
         fill(255, 0, 0); // Example color for a hit
-      } else if (grid[row][col] === 3) {
+      }
+      else if (grid[row][col] === 3) {
         fill(0, 0, 255); // Example color for a miss
       }
 
@@ -167,7 +170,7 @@ function renderBoard(grid, xOffset, yOffset) {
 
       image(
         gameTile, xOffset + col * TILE_SIZE, yOffset + row * TILE_SIZE, TILE_SIZE, TILE_SIZE
-      )
+      );
     }
   }
 }
@@ -190,7 +193,8 @@ function determineActiveSquare() {
     mouseY >= playerBoardY && mouseY < playerBoardY + ROWS * TILE_SIZE) {
     currentCol = int((mouseX - playerBoardX) / TILE_SIZE);
     currentRow = int((mouseY - playerBoardY) / TILE_SIZE);
-  } else {
+  }
+  else {
     currentCol = -1;
     currentRow = -1; // Reset if mouse is out of bounds
   }
@@ -208,8 +212,10 @@ function keyPressed() {
 function directionChange(){
   if(keyCode === 82 && direction === 0){
     direction = 1;
+    rotate(45);
   }
   if(keyCode === 82 && direction === 1){
     direction = 0;
+    rotate(-45);
   }
 }
