@@ -1,57 +1,45 @@
-// Battleship - Capstone
-// Michael R.
-// November 2024
-
 let shotSound;
-let state = 'title';
+let state = 'title';  // Initial state is 'title'
 
 let direction = 0;
-let TILE_SIZE = 40; // Size of each tile
-let ROWS = 15;      // Number of rows in each board
-let COLS = 15;      // Number of columns in each board
+let TILE_SIZE = 40;
+let ROWS = 15;
+let COLS = 15;
 
-// Define the two boards
-let playerBoardX = 50; // X position of the player's board
-let playerBoardY = 55; // Y position of the player's board
-let aiBoardX = 880;    // X position of the AI's board (right side)
-let aiBoardY = 55;     // Y position of the AI's board
+let playerBoardX = 50;
+let playerBoardY = 55;
+let aiBoardX = 880;
+let aiBoardY = 55;
 
-// 2D arrays to represent the grids
 let playerGrid = [];
 let aiGrid = [];
 
-// Variables for overlay
 let currentRow = -1;
 let currentCol = -1;
 
-
-//Represent all available tiles for placement of ships
-let availableTiles = [];
-angleMode(DEGREES);
-
-//Array to push all ships to the grid to be placed by the player
 let playerShips = [];
-
-//Array to push all ships to the AI's grid to be placed (but not shown) by the computer
 let AIShips = [];
 
+let shipDisplayX = 600;
+let shipDisplayY = 150;
 
-// 2D array to represent the available ships
-// let ships = [
-//   { name: "Carrier", size: 5, placed: false },
-//   { name: "Battleship", size: 4, placed: false },
-//   { name: "Cruiser", size: 3, placed: false },
-//   { name: "SubMarine", size: 3, placed: false },
-//   { name: "Destroyer", size: 2, placed: false },
-//   { name: "Patrol", size: 2, placed: false}
-// ];
+let playButtonW = 200;
+let playButtonH = 50;
+let playButtonX = (width - playButtonW) / 2;
+let playButtonY = height - 150;
+
 function loadShips() {
-  directionChange();
-  playerShips.push(new Ship());
-
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY, "Carrier", 0, 5, carrier));
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 1, "Battleship", 0, 4, battleship));
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 2, "Cruiser", 0, 3, cruiser));
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 3, "Destroyer", 0, 2, destroyer));
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 4, "Patrol", 0, 2, patrol));
 }
+
 class Ship {
   constructor(x, y, name, dir, length, img) {
+    this.initialX = x;
+    this.initialY = y;
     this.x = x;
     this.y = y;
     this.name = name;
@@ -60,24 +48,99 @@ class Ship {
     this.place = false;
     this.hitboxes = [];
     this.img = img;
+    this.isDragging = false;
   }
-  action() {
-    this.display();
-  }
+
   display() {
     this.drawShip();
-
   }
-  drawShip() {
-    image(this.img, this.x, this.y);
 
+  drawShip() {
+    let shipWidth = this.dir === 0 ? this.length * TILE_SIZE : TILE_SIZE;
+    let shipHeight = this.dir === 0 ? TILE_SIZE : this.length * TILE_SIZE;
+    image(this.img, this.x, this.y, shipWidth, shipHeight);
+  }
+
+  isMouseOver() {
+    let shipWidth = this.dir === 0 ? this.length * TILE_SIZE : TILE_SIZE;
+    let shipHeight = this.dir === 0 ? TILE_SIZE : this.length * TILE_SIZE;
+    return mouseX >= this.x && mouseX <= this.x + shipWidth &&
+           mouseY >= this.y && mouseY <= this.y + shipHeight;
+  }
+
+  startDragging() {
+    this.isDragging = true;
+    this.offsetX = mouseX - this.x;
+    this.offsetY = mouseY - this.y;
+  }
+
+  drag() {
+    if (this.isDragging) {
+      this.x = mouseX - this.offsetX;
+      this.y = mouseY - this.offsetY;
+    }
+  }
+
+  stopDragging() {
+    this.isDragging = false;
+  }
+
+  resetPosition() {
+    this.x = this.initialX;
+    this.y = this.initialY;
   }
 }
 
+function mousePressed() {
+  // Check if the mouse is clicked on the play button
+  if (state === "title" && mouseX >= playButtonX && mouseX <= playButtonX + playButtonW &&
+      mouseY >= playButtonY && mouseY <= playButtonY + playButtonH) {
+    state = "gameplay"; // Change the state to 'gameplay' when the Play button is clicked
+  }
 
+  // Check if the player clicked on any ship to drag it
+  if (state === "gameplay") {
+    for (let ship of playerShips) {
+      if (ship.isMouseOver()) {
+        ship.startDragging();
+        break;
+      }
+    }
+  }
+}
 
+function mouseDragged() {
+  for (let ship of playerShips) {
+    if (ship.isDragging) {
+      ship.drag();
+    }
+  }
+}
 
-//Pre-load all required resources
+function mouseReleased() {
+  for (let ship of playerShips) {
+    if (ship.isDragging) {
+      ship.stopDragging();
+      let gridX = int((ship.x - playerBoardX) / TILE_SIZE);
+      let gridY = int((ship.y - playerBoardY) / TILE_SIZE);
+
+      if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS) {
+        ship.x = playerBoardX + gridX * TILE_SIZE;
+        ship.y = playerBoardY + gridY * TILE_SIZE;
+        for (let i = 0; i < ship.length; i++) {
+          if (ship.dir === 0) {
+            playerGrid[gridY][gridX + i] = 1;
+          } else {
+            playerGrid[gridY + i][gridX] = 1;
+          }
+        }
+      } else {
+        ship.resetPosition(); // Reset position if out of bounds
+      }
+    }
+  }
+}
+
 function preload() {
   shotSound = loadSound("assets/gunFire.mp3");
   titleImage = loadImage("assets/Battleship logo.png");
@@ -91,55 +154,49 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(1600, 800); // Adjust canvas size to fit both boards
+  createCanvas(1600, 800);
 
-  // Initialize player and AI grids
   for (let row = 0; row < ROWS; row++) {
     playerGrid[row] = [];
     aiGrid[row] = [];
     for (let col = 0; col < COLS; col++) {
-      playerGrid[row][col] = 0; // Empty tile
-      aiGrid[row][col] = 0;     // Empty tile
+      playerGrid[row][col] = 0;
+      aiGrid[row][col] = 0;
     }
   }
 
-  playButtonW = 200;
-  playButtonH = 50;
-  playButtonX = (width - playButtonW) / 2;
-  playButtonY = height - 150;
   loadShips();
 }
 
 function draw() {
-  background(200); // Background color
+  background(200);
 
   if (state === "title") {
     renderTitleScreen();
-  }
-  else if (state === "gameplay") {
-    renderBoard(playerGrid, playerBoardX, playerBoardY); // Player's board
-    renderBoard(aiGrid, aiBoardX, aiBoardY);             // AI's board
+  } else if (state === "gameplay") {
+    renderBoard(playerGrid, playerBoardX, playerBoardY);
+    renderBoard(aiGrid, aiBoardX, aiBoardY);
+
+    for (let ship of playerShips) {
+      ship.display();
+    }
+
     determineActiveSquare();
     selectionOverlay();
 
-    // Add labels for clarity
     fill(0);
     textSize(24);
     textAlign(CENTER, CENTER);
     text("Your Board", playerBoardX + COLS * TILE_SIZE / 2, playerBoardY - 30);
     text("AI's Board", aiBoardX + COLS * TILE_SIZE / 2, aiBoardY - 30);
 
-
-
-    text(mouseX + ", " + mouseY, mouseX, mouseY); //Co-ord debugging
+    text(mouseX + ", " + mouseY, mouseX, mouseY); // Debugging
   }
-
 }
 
 function renderTitleScreen() {
-  image(titleImage, 0, 0, width, height); // Draw the title screen image
+  image(titleImage, 0, 0, width, height);
 
-  // Draw the Play button
   fill(255);
   rect(playButtonX, playButtonY, playButtonW, playButtonH);
   fill(0);
@@ -151,71 +208,44 @@ function renderTitleScreen() {
 function renderBoard(grid, xOffset, yOffset) {
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
-      // Set the default tile color
-      fill(220); // Default gray color
-      stroke(0); // Black tile border
+      fill(220);
+      stroke(0);
 
-      // Highlight tile if it's occupied (example: 1 for a ship)
       if (grid[row][col] === 1) {
-        fill(100); // Example color for ships
-      }
-      else if (grid[row][col] === 2) {
-        fill(255, 0, 0); // Example color for a hit
-      }
-      else if (grid[row][col] === 3) {
-        fill(0, 0, 255); // Example color for a miss
+        fill(100);
+      } else if (grid[row][col] === 2) {
+        fill(255, 0, 0);
+      } else if (grid[row][col] === 3) {
+        fill(0, 0, 255);
       }
 
-      // Draw the tile using the offsets
-
-      image(
-        gameTile, xOffset + col * TILE_SIZE, yOffset + row * TILE_SIZE, TILE_SIZE, TILE_SIZE
-      );
+      image(gameTile, xOffset + col * TILE_SIZE, yOffset + row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
     }
   }
 }
-
-
 
 function selectionOverlay() {
   noStroke();
   fill(0, 150, 0, 150);
 
-  // Check if currentRow and currentCol are valid for the player board
   if (currentRow >= 0 && currentRow < ROWS && currentCol >= 0 && currentCol < COLS) {
     rect(playerBoardX + currentCol * TILE_SIZE, playerBoardY + currentRow * TILE_SIZE, TILE_SIZE, TILE_SIZE);
   }
 }
 
 function determineActiveSquare() {
-  // Determine the grid cell based on mouse position relative to the player's board
   if (mouseX >= playerBoardX && mouseX < playerBoardX + COLS * TILE_SIZE &&
     mouseY >= playerBoardY && mouseY < playerBoardY + ROWS * TILE_SIZE) {
     currentCol = int((mouseX - playerBoardX) / TILE_SIZE);
     currentRow = int((mouseY - playerBoardY) / TILE_SIZE);
-  }
-  else {
+  } else {
     currentCol = -1;
-    currentRow = -1; // Reset if mouse is out of bounds
+    currentRow = -1;
   }
 }
 
 function keyPressed() {
   if (keyCode === ENTER) {
-
-
     state = 'gameplay';
-  }
-}
-
-//Determine which way the ship is facing when r key is pressed and change accordingly
-function directionChange(){
-  if(keyCode === 82 && direction === 0){
-    direction = 1;
-    rotate(45);
-  }
-  if(keyCode === 82 && direction === 1){
-    direction = 0;
-    rotate(-45);
   }
 }
