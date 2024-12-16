@@ -25,16 +25,10 @@ let shipDisplayY = 150;
 
 let playButtonW = 200;
 let playButtonH = 50;
-let playButtonX = (width - playButtonW) / 2;
-let playButtonY = height - 150;
+let playButtonX = (windowWidth - playButtonW) / 2;
+let playButtonY = windowHeight - 150;
 
-function loadShips() {
-  playerShips.push(new Ship(shipDisplayX, shipDisplayY, "Carrier", 0, 5, carrier));
-  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 1, "Battleship", 0, 4, battleship));
-  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 2, "Cruiser", 0, 3, cruiser));
-  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 3, "Destroyer", 0, 2, destroyer));
-  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 4, "Patrol", 0, 2, patrol));
-}
+let titleImage, battleship, carrier, cruiser, destroyer, patrol, submarine, gameTile;
 
 class Ship {
   constructor(x, y, name, dir, length, img) {
@@ -91,11 +85,49 @@ class Ship {
   }
 }
 
+function preload() {
+  titleImage = loadImage("assets/Battleship logo.png");
+  battleship = loadImage("assets/ShipBattleshipHull.png");
+  carrier = loadImage("assets/ShipCarrierHull.png");
+  cruiser = loadImage("assets/ShipCruiserHull.png");
+  destroyer = loadImage("assets/ShipDestroyerHull.png");
+  patrol = loadImage("assets/ShipPatrolHull.png");
+  submarine = loadImage("assets/ShipSubMarineHull.png");
+  gameTile = loadImage("assets/tileBlank.png");
+
+  shotSound = loadSound("assets/gunFire.mp3"); // Preload sound but don't play it yet
+}
+
+function setup() {
+  createCanvas(windowWidth, windowHeight); // Make canvas dynamic based on window size
+
+  for (let row = 0; row < ROWS; row++) {
+    playerGrid[row] = [];
+    aiGrid[row] = [];
+    for (let col = 0; col < COLS; col++) {
+      playerGrid[row][col] = 0;
+      aiGrid[row][col] = 0;
+    }
+  }
+
+  loadShips();
+}
+
+function loadShips() {
+  // Ensure ships are loaded after the class is defined
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY, "Carrier", 0, 5, carrier));
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 1, "Battleship", 0, 4, battleship));
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 2, "Cruiser", 0, 3, cruiser));
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 3, "Destroyer", 0, 2, destroyer));
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 4, "Patrol", 0, 2, patrol));
+}
+
 function mousePressed() {
   // Check if the mouse is clicked on the play button
   if (state === "title" && mouseX >= playButtonX && mouseX <= playButtonX + playButtonW &&
       mouseY >= playButtonY && mouseY <= playButtonY + playButtonH) {
     state = "gameplay"; // Change the state to 'gameplay' when the Play button is clicked
+    shotSound.play();  // Resume sound after the user clicks play
   }
 
   // Check if the player clicked on any ship to drag it
@@ -141,59 +173,6 @@ function mouseReleased() {
   }
 }
 
-function preload() {
-  shotSound = loadSound("assets/gunFire.mp3");
-  titleImage = loadImage("assets/Battleship logo.png");
-  battleship = loadImage("assets/ShipBattleshipHull.png");
-  carrier = loadImage("assets/ShipCarrierHull.png");
-  cruiser = loadImage("assets/ShipCruiserHull.png");
-  destroyer = loadImage("assets/ShipDestroyerHull.png");
-  patrol = loadImage("assets/ShipPatrolHull.png");
-  submarine = loadImage("assets/ShipSubMarineHull.png");
-  gameTile = loadImage("assets/tileBlank.png");
-}
-
-function setup() {
-  createCanvas(1600, 800);
-
-  for (let row = 0; row < ROWS; row++) {
-    playerGrid[row] = [];
-    aiGrid[row] = [];
-    for (let col = 0; col < COLS; col++) {
-      playerGrid[row][col] = 0;
-      aiGrid[row][col] = 0;
-    }
-  }
-
-  loadShips();
-}
-
-function draw() {
-  background(200);
-
-  if (state === "title") {
-    renderTitleScreen();
-  } else if (state === "gameplay") {
-    renderBoard(playerGrid, playerBoardX, playerBoardY);
-    renderBoard(aiGrid, aiBoardX, aiBoardY);
-
-    for (let ship of playerShips) {
-      ship.display();
-    }
-
-    determineActiveSquare();
-    selectionOverlay();
-
-    fill(0);
-    textSize(24);
-    textAlign(CENTER, CENTER);
-    text("Your Board", playerBoardX + COLS * TILE_SIZE / 2, playerBoardY - 30);
-    text("AI's Board", aiBoardX + COLS * TILE_SIZE / 2, aiBoardY - 30);
-
-    text(mouseX + ", " + mouseY, mouseX, mouseY); // Debugging
-  }
-}
-
 function renderTitleScreen() {
   image(titleImage, 0, 0, width, height);
 
@@ -226,11 +205,53 @@ function renderBoard(grid, xOffset, yOffset) {
 
 function selectionOverlay() {
   noStroke();
-  fill(0, 150, 0, 150);
-
+  
   if (currentRow >= 0 && currentRow < ROWS && currentCol >= 0 && currentCol < COLS) {
+    let overlayColor = color(0, 255, 0, 150); // Default green (valid spot)
+    
+    if (isMouseOverShip(currentRow, currentCol)) {
+      overlayColor = color(169, 169, 169, 150);  // Grey when over a ship
+    } 
+    else if (isOneSquareAwayFromShip(currentRow, currentCol)) {
+      overlayColor = color(0, 0, 255, 150);  // Blue when one square away
+    }
+
+    fill(overlayColor);
     rect(playerBoardX + currentCol * TILE_SIZE, playerBoardY + currentRow * TILE_SIZE, TILE_SIZE, TILE_SIZE);
   }
+}
+
+function isMouseOverShip(row, col) {
+  for (let ship of playerShips) {
+    let shipWidth = ship.dir === 0 ? ship.length * TILE_SIZE : TILE_SIZE;
+    let shipHeight = ship.dir === 0 ? TILE_SIZE : ship.length * TILE_SIZE;
+
+    if (mouseX >= ship.x && mouseX <= ship.x + shipWidth &&
+        mouseY >= ship.y && mouseY <= ship.y + shipHeight) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isOneSquareAwayFromShip(row, col) {
+  for (let ship of playerShips) {
+    let shipWidth = ship.dir === 0 ? ship.length * TILE_SIZE : TILE_SIZE;
+    let shipHeight = ship.dir === 0 ? TILE_SIZE : ship.length * TILE_SIZE;
+
+    for (let i = 0; i < ship.length; i++) {
+      let shipX = ship.x + (ship.dir === 0 ? i * TILE_SIZE : 0);
+      let shipY = ship.y + (ship.dir === 1 ? i * TILE_SIZE : 0);
+
+      if (
+        (abs(shipX - (playerBoardX + col * TILE_SIZE)) === TILE_SIZE && shipY === playerBoardY + row * TILE_SIZE) ||
+        (abs(shipY - (playerBoardY + row * TILE_SIZE)) === TILE_SIZE && shipX === playerBoardX + col * TILE_SIZE)
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 function determineActiveSquare() {
