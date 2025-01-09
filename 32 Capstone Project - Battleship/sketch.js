@@ -3,12 +3,12 @@ let state = 'title';  // Initial state is 'title'
 
 let direction = 0;
 let TILE_SIZE = 40;
-let ROWS = 15;
-let COLS = 15;
+let ROWS = 10;
+let COLS = 10;
 
-let playerBoardX = 50;
+let playerBoardX = 200;
 let playerBoardY = 55;
-let aiBoardX = 880;
+let aiBoardX = 700;
 let aiBoardY = 55;
 
 let playerGrid = [];
@@ -20,16 +20,29 @@ let currentCol = -1;
 let playerShips = [];
 let AIShips = [];
 
-let shipDisplayX = 600;
-let shipDisplayY = 150;
+let shipDisplayX = 660;
+let shipDisplayY = 135;
 
-let playButtonW = 200;
-let playButtonH = 50;
-let playButtonX = (windowWidth - playButtonW) / 2;
-let playButtonY = windowHeight - 150;
 
+let playButtonW;
+let playButtonH;
+let playButtonX;
+let playButtonY;
 let titleImage, battleship, carrier, cruiser, destroyer, patrol, submarine, gameTile;
 
+
+function preload() {
+  titleImage = loadImage("assets/Battleship logo.gif");
+  battleship = loadImage("assets/ShipBattleshipHull.png");
+  carrier = loadImage("assets/ShipCarrierHull.png");
+  cruiser = loadImage("assets/ShipCruiserHull.png");
+  destroyer = loadImage("assets/ShipDestroyerHull.png");
+  patrol = loadImage("assets/ShipPatrolHull.png");
+  submarine = loadImage("assets/ShipSubMarineHull.png");
+  gameTile = loadImage("assets/tileBlank.png");
+
+  shotSound = loadSound("assets/gunFire.mp3"); // Preload sound but don't play it yet
+}
 class Ship {
   constructor(x, y, name, dir, length, img) {
     this.initialX = x;
@@ -85,22 +98,21 @@ class Ship {
   }
 }
 
-function preload() {
-  titleImage = loadImage("assets/Battleship logo.png");
-  battleship = loadImage("assets/ShipBattleshipHull.png");
-  carrier = loadImage("assets/ShipCarrierHull.png");
-  cruiser = loadImage("assets/ShipCruiserHull.png");
-  destroyer = loadImage("assets/ShipDestroyerHull.png");
-  patrol = loadImage("assets/ShipPatrolHull.png");
-  submarine = loadImage("assets/ShipSubMarineHull.png");
-  gameTile = loadImage("assets/tileBlank.png");
 
-  shotSound = loadSound("assets/gunFire.mp3"); // Preload sound but don't play it yet
+function loadShips() {
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY, "Carrier", 0, 5, carrier));
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 1, "Battleship", 0, 4, battleship));
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 2, "Cruiser", 0, 3, cruiser));
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 3, "Destroyer", 0, 2, destroyer));
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 4, "Patrol", 0, 2, patrol));
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight); // Make canvas dynamic based on window size
-
+  createCanvas(1600, 800); 
+  let playButtonW = 200;
+  let playButtonH = 50;
+  let playButtonX = (windowWidth - playButtonW) / 2;
+  let playButtonY = windowHeight - 150;
   for (let row = 0; row < ROWS; row++) {
     playerGrid[row] = [];
     aiGrid[row] = [];
@@ -111,24 +123,36 @@ function setup() {
   }
 
   loadShips();
+
 }
 
-function loadShips() {
-  // Ensure ships are loaded after the class is defined
-  playerShips.push(new Ship(shipDisplayX, shipDisplayY, "Carrier", 0, 5, carrier));
-  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 1, "Battleship", 0, 4, battleship));
-  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 2, "Cruiser", 0, 3, cruiser));
-  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 3, "Destroyer", 0, 2, destroyer));
-  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 4, "Patrol", 0, 2, patrol));
+function draw() {
+  background(255);
+
+  if (state === 'title') {
+    renderTitleScreen();
+  } else if (state === 'gameplay') {
+    renderBoard(playerGrid, playerBoardX, playerBoardY);
+    renderBoard(aiGrid, aiBoardX, aiBoardY);
+    displayShips();
+    determineActiveSquare();
+    selectionOverlay();
+  }
+  
+  
+  
+}
+
+
+function displayShips(){
+  for(let i=0; i<playerShips.length; i++){
+    let s = playerShips[i];
+    s.display();
+  }
 }
 
 function mousePressed() {
-  // Check if the mouse is clicked on the play button
-  if (state === "title" && mouseX >= playButtonX && mouseX <= playButtonX + playButtonW &&
-      mouseY >= playButtonY && mouseY <= playButtonY + playButtonH) {
-    state = "gameplay"; // Change the state to 'gameplay' when the Play button is clicked
-    shotSound.play();  // Resume sound after the user clicks play
-  }
+
 
   // Check if the player clicked on any ship to drag it
   if (state === "gameplay") {
@@ -183,6 +207,7 @@ function renderTitleScreen() {
   textSize(24);
   text("Play", playButtonX + playButtonW / 2, playButtonY + playButtonH / 2);
 }
+
 
 function renderBoard(grid, xOffset, yOffset) {
   for (let row = 0; row < ROWS; row++) {
@@ -263,6 +288,7 @@ function determineActiveSquare() {
     currentCol = -1;
     currentRow = -1;
   }
+  console.log(currentRow,currentCol);
 }
 
 function keyPressed() {
