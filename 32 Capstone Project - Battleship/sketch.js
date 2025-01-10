@@ -3,12 +3,12 @@ let state = 'title';  // Initial state is 'title'
 
 let direction = 0;
 let TILE_SIZE = 40;
-let ROWS = 10;
-let COLS = 10;
+let ROWS = 15;
+let COLS = 15;
 
-let playerBoardX = 200;
+let playerBoardX = 50;
 let playerBoardY = 55;
-let aiBoardX = 700;
+let aiBoardX = 950;
 let aiBoardY = 55;
 
 let playerGrid = [];
@@ -24,10 +24,6 @@ let shipDisplayX = 660;
 let shipDisplayY = 135;
 
 
-let playButtonW;
-let playButtonH;
-let playButtonX;
-let playButtonY;
 let titleImage, battleship, carrier, cruiser, destroyer, patrol, submarine, gameTile;
 
 
@@ -131,7 +127,7 @@ function draw() {
 
   if (state === 'title') {
     renderTitleScreen();
-  } else if (state === 'gameplay') {
+  } else if (state === 'placeShips') {
     renderBoard(playerGrid, playerBoardX, playerBoardY);
     renderBoard(aiGrid, aiBoardX, aiBoardY);
     displayShips();
@@ -155,7 +151,7 @@ function mousePressed() {
 
 
   // Check if the player clicked on any ship to drag it
-  if (state === "gameplay") {
+  if (state === "placeShips") {
     for (let ship of playerShips) {
       if (ship.isMouseOver()) {
         ship.startDragging();
@@ -200,15 +196,7 @@ function mouseReleased() {
 function renderTitleScreen() {
   image(titleImage, 0, 0, width, height);
 
-  fill(255);
-  rect(playButtonX, playButtonY, playButtonW, playButtonH);
-  fill(0);
-  textAlign(CENTER, CENTER);
-  textSize(24);
-  text("Play", playButtonX + playButtonW / 2, playButtonY + playButtonH / 2);
 }
-
-
 function renderBoard(grid, xOffset, yOffset) {
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
@@ -293,6 +281,6 @@ function determineActiveSquare() {
 
 function keyPressed() {
   if (keyCode === ENTER) {
-    state = 'gameplay';
+    state = 'placeShips';
   }
 }
