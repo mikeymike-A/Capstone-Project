@@ -284,3 +284,4 @@ function keyPressed() {
     state = 'placeShips';
   }
 }
+
