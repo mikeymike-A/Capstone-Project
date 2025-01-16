@@ -1,474 +1,349 @@
-// let shotSound;
-// let state = 'title';  // Initial state is 'title'
+let shotSound;
+let state = 'title';  // Initial state is 'title'
 
-// let direction = 0;
-// let TILE_SIZE = 40;
-// let ROWS = 15;
-// let COLS = 15;
+let direction = 0;
+let TILE_SIZE = 40;
+let ROWS = 15;
+let COLS = 15;
 
-// let playerBoardX = 50;
-// let playerBoardY = 55;
-// let aiBoardX = 950;
-// let aiBoardY = 55;
+let playerBoardX = 50;
+let playerBoardY = 55;
+let aiBoardX = 950;
+let aiBoardY = 55;
 
-// let playerGrid = [];
-// let aiGrid = [];
+let playerGrid = [];
+let aiGrid = [];
 
-// let currentRow = -1;
-// let currentCol = -1;
+let currentRow = -1;
+let currentCol = -1;
 
-// let playerShips = [];
-// let AIShips = [];
+let playerShips = [];
+let AIShips = [];
 
-// let shipDisplayX = 660;
-// let shipDisplayY = 135;
+let shipDisplayX = 660;
+let shipDisplayY = 135;
 
-// let titleImage, battleship, carrier, cruiser, destroyer, patrol, submarine, gameTile;
+let titleImage, battleship, carrier, cruiser, destroyer, patrol, submarine, gameTile;
 
-// function preload() {
-//   titleImage = loadImage("assets/Battleship logo.gif");
-//   battleship = loadImage("assets/ShipBattleshipHull.png");
-//   carrier = loadImage("assets/ShipCarrierHull.png");
-//   cruiser = loadImage("assets/ShipCruiserHull.png");
-//   destroyer = loadImage("assets/ShipDestroyerHull.png");
-//   patrol = loadImage("assets/ShipPatrolHull.png");
-//   submarine = loadImage("assets/ShipSubMarineHull.png");
-//   gameTile = loadImage("assets/tileBlank.png");
+function preload() {
+  titleImage = loadImage("assets/Battleship logo.gif");
+  battleship = loadImage("assets/ShipBattleshipHull.png");
+  carrier = loadImage("assets/ShipCarrierHull.png");
+  cruiser = loadImage("assets/ShipCruiserHull.png");
+  destroyer = loadImage("assets/ShipDestroyerHull.png");
+  patrol = loadImage("assets/ShipPatrolHull.png");
+  submarine = loadImage("assets/ShipSubMarineHull.png");
+  gameTile = loadImage("assets/tileBlank.png");
 
-//   shotSound = loadSound("assets/gunFire.mp3"); // Preload sound but don't play it yet
-// }
-
-// class Ship {
-//   constructor(x, y, name, dir, length, img) {
-//     this.initialX = x;
-//     this.initialY = y;
-//     this.x = x;
-//     this.y = y;
-//     this.name = name;
-//     this.dir = dir;
-//     this.length = length;
-//     this.place = false;
-//     this.hitboxes = [];
-//     this.img = img;
-//     this.isDragging = false;
-//   }
-
-//   display() {
-//     this.drawShip();
-//   }
-
-//   drawShip() {
-//     let shipWidth = this.dir === 0 ? this.length * TILE_SIZE : TILE_SIZE;
-//     let shipHeight = this.dir === 0 ? TILE_SIZE : this.length * TILE_SIZE;
-//     image(this.img, this.x, this.y, shipWidth, shipHeight);
-//   }
-
-//   isMouseOver() {
-//     let shipWidth = this.dir === 0 ? this.length * TILE_SIZE : TILE_SIZE;
-//     let shipHeight = this.dir === 0 ? TILE_SIZE : this.length * TILE_SIZE;
-//     return mouseX >= this.x && mouseX <= this.x + shipWidth &&
-//            mouseY >= this.y && mouseY <= this.y + shipHeight;
-//   }
-
-//   startDragging() {
-//     this.isDragging = true;
-//     this.offsetX = mouseX - this.x;
-//     this.offsetY = mouseY - this.y;
-//   }
-
-//   drag() {
-//     if (this.isDragging) {
-//       this.x = mouseX - this.offsetX;
-//       this.y = mouseY - this.offsetY;
-//     }
-//   }
-
-//   stopDragging() {
-//     this.isDragging = false;
-//   }
-
-//   resetPosition() {
-//     this.x = this.initialX;
-//     this.y = this.initialY;
-//   }
-// }
-
-// function loadShips() {
-//   playerShips.push(new Ship(shipDisplayX, shipDisplayY, "Carrier", 0, 5, carrier));
-//   playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 1, "Battleship", 0, 4, battleship));
-//   playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 2, "Cruiser", 0, 3, cruiser));
-//   playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 3, "Destroyer", 0, 2, destroyer));
-//   playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 4, "Patrol", 0, 2, patrol));
-// }
-
-// function setup() {
-//   createCanvas(1600, 800); 
-//   for (let row = 0; row < ROWS; row++) {
-//     playerGrid[row] = [];
-//     aiGrid[row] = [];
-//     for (let col = 0; col < COLS; col++) {
-//       playerGrid[row][col] = 0;
-//       aiGrid[row][col] = 0;
-//     }
-//   }
-
-//   loadShips();
-// }
-
-// function draw() {
-//   background(255);
-
-//   if (state === 'title') {
-//     renderTitleScreen();
-//   } else if (state === 'placeShips') {
-//     renderBoard(playerGrid, playerBoardX, playerBoardY);
-//     renderBoard(aiGrid, aiBoardX, aiBoardY);
-//     displayShips();
-//     determineActiveSquare();
-//     selectionOverlay();
-//   }
-// }
-
-// function displayShips() {
-//   for (let i = 0; i < playerShips.length; i++) {
-//     let s = playerShips[i];
-//     s.display();
-//   }
-// }
-
-// function mousePressed() {
-//   if (state === "placeShips") {
-//     for (let ship of playerShips) {
-//       if (ship.isMouseOver()) {
-//         ship.startDragging();
-//         break;
-//       }
-//     }
-//   }
-// }
-
-// function mouseDragged() {
-//   for (let ship of playerShips) {
-//     if (ship.isDragging) {
-//       ship.drag();
-//     }
-//   }
-// }
-
-// function mouseReleased() {
-//   for (let ship of playerShips) {
-//     if (ship.isDragging) {
-//       ship.stopDragging();
-//       let gridX = int((ship.x - playerBoardX) / TILE_SIZE);
-//       let gridY = int((ship.y - playerBoardY) / TILE_SIZE);
-
-//       if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS &&
-//           canPlaceShip(playerGrid, gridY, gridX, ship.dir, ship.length)) {
-//         ship.x = playerBoardX + gridX * TILE_SIZE;
-//         ship.y = playerBoardY + gridY * TILE_SIZE;
-//         ship.place = true; // Mark the ship as placed on the board
-
-//         for (let i = 0; i < ship.length; i++) {
-//           if (ship.dir === 0) playerGrid[gridY][gridX + i] = 0; // Horizontal placement
-//           else playerGrid[gridY + i][gridX] = 0; // Vertical placement
-//         }
-//       } else {
-//         ship.resetPosition(); // Reset to initial position if invalid placement
-//       }
-//     }
-//   }
-//   placeAIShips();
-// }
-
-// function renderTitleScreen() {
-//   image(titleImage, 0, 0, width, height);
-// }
-
-// function renderBoard(grid, xOffset, yOffset) {
-//   for (let row = 0; row < ROWS; row++) {
-//     for (let col = 0; col < COLS; col++) {
-//       fill(220);
-//       stroke(0);
-
-//       if (grid[row][col] === 1) {
-//         fill(100);
-//       } else if (grid[row][col] === 2) {
-//         fill(255, 0, 0);
-//       } else if (grid[row][col] === 3) {
-//         fill(0, 0, 255);
-//       }
-
-//       image(gameTile, xOffset + col * TILE_SIZE, yOffset + row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-//     }
-//   }
-// }
-
-// function selectionOverlay() {
-//   noStroke();
-  
-//   if (currentRow >= 0 && currentRow < ROWS && currentCol >= 0 && currentCol < COLS) {
-//     let overlayColor = color(0, 255, 0, 150); // Default green (valid spot)
-    
-//     if (isMouseOverShip(currentRow, currentCol)) {
-//       overlayColor = color(169, 169, 169, 150);  // Grey when over a ship
-//     } 
-//     else if (isOneSquareAwayFromShip(currentRow, currentCol)) {
-//       overlayColor = color(0, 0, 255, 150);  // Blue when one square away
-//     }
-
-//     fill(overlayColor);
-//     rect(playerBoardX + currentCol * TILE_SIZE, playerBoardY + currentRow * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-//   }
-// }
-
-// function isMouseOverShip(row, col) {
-//   for (let ship of playerShips) {
-//     let shipWidth = ship.dir === 0 ? ship.length * TILE_SIZE : TILE_SIZE;
-//     let shipHeight = ship.dir === 0 ? TILE_SIZE : ship.length * TILE_SIZE;
-
-//     if (mouseX >= ship.x && mouseX <= ship.x + shipWidth &&
-//         mouseY >= ship.y && mouseY <= ship.y + shipHeight) {
-//       return true;
-//     }
-//   }
-//   return false;
-// }
-
-// function isOneSquareAwayFromShip(row, col) {
-//   for (let ship of playerShips) {
-//     let shipWidth = ship.dir === 0 ? ship.length * TILE_SIZE : TILE_SIZE;
-//     let shipHeight = ship.dir === 0 ? TILE_SIZE : ship.length * TILE_SIZE;
-
-//     for (let i = 0; i < ship.length; i++) {
-//       let shipX = ship.x + (ship.dir === 0 ? i * TILE_SIZE : 0);
-//       let shipY = ship.y + (ship.dir === 1 ? i * TILE_SIZE : 0);
-
-//       if (
-//         (abs(shipX - (playerBoardX + col * TILE_SIZE)) === TILE_SIZE && shipY === playerBoardY + row * TILE_SIZE) ||
-//         (abs(shipY - (playerBoardY + row * TILE_SIZE)) === TILE_SIZE && shipX === playerBoardX + col * TILE_SIZE)
-//       ) {
-//         return true;
-//       }
-//     }
-//   }
-//   return false;
-// }
-
-// function determineActiveSquare() {
-//   if (mouseX >= playerBoardX && mouseX < playerBoardX + COLS * TILE_SIZE &&
-//     mouseY >= playerBoardY && mouseY < playerBoardY + ROWS * TILE_SIZE) {
-//     currentCol = int((mouseX - playerBoardX) / TILE_SIZE);
-//     currentRow = int((mouseY - playerBoardY) / TILE_SIZE);
-//   } else {
-//     currentCol = -1;
-//     currentRow = -1;
-//   }
-//   console.log(currentRow, currentCol);
-// }
-
-// function keyPressed() {
-//   if (keyCode === ENTER) {
-//     if (state === 'title') {
-//       // Transition to the ship placement phase from the title screen
-//       state = 'placeShips';
-//     } else if (state === 'placeShips') {
-//       // Optionally, add logic to transition to the next phase after placing ships (e.g., game start)
-//       if (placed) {
-//       // Add any logic here for firing phase, if required
-//       state = 'firing'
-
-//     }else{
-//       console.log("Please place all ships before entering the firing stage!");
-//       state = 'placeShips';
-//     }
-//   }
-// }
-
-// function isAllShipsPlaced() {
-//   return playerShips.every(ship => ship.place);
-// }
-
-// function canPlaceShip(grid, row, col, dir, length) {
-//   if (dir === 0) { // Horizontal placement
-//     if (col + length > COLS) return false; // Ship exceeds the grid width
-//     for (let i = 0; i < length; i++) {
-//       if (grid[row][col + i] !== 0) return false; // Overlaps another ship
-//     }
-//   } else { // Vertical placement
-//     if (row + length > ROWS) return false; // Ship exceeds the grid height
-//     for (let i = 0; i < length; i++) {
-//       if (grid[row + i][col] !== 0) return false; // Overlaps another ship
-//     }
-//   }
-//   return true;
-// }
-
-// function placeAIShips() {
-//   AIShips = [
-//     new Ship(0, 0, "Carrier", 0, 5, carrier),
-//     new Ship(0, 0, "Battleship", 0, 4, battleship),
-//     new Ship(0, 0, "Cruiser", 0, 3, cruiser),
-//     new Ship(0, 0, "Destroyer", 0, 2, destroyer),
-//     new Ship(0, 0, "Patrol", 0, 2, patrol),
-//   ];
-
-//   for (let ship of AIShips) {
-//     let placed = false;
-//     while (!placed) {
-//       let startRow = int(random(0, ROWS));
-//       let startCol = int(random(0, COLS));
-//       let dir = 0; // Force horizontal placement
-
-//       placed = canPlaceShip(aiGrid, startRow, startCol, dir, ship.length);
-
-//       if (placed) {
-//         for (let i = 0; i < ship.length; i++) {
-//           aiGrid[startRow][startCol + i] = 1; // Place horizontally
-//         }
-//         ship.row = startRow;
-//         ship.col = startCol;
-//         ship.dir = dir; // Ensure the direction is saved as horizontal
-//         ship.place = true;
-//       }
-//     }
-//     if (!placed) {
-//       console.error("AI ships were not placed correctly. Retrying...");
-//       placeAIShips(); // Retry placement if necessary
-//     }
-//   }
-// }
-
-//----------------------------------------------------------------------------------
-let input, submitButton;
-let gameBoard = [
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-];
-
-let isReady = false; // To track if the ships are set
-
-// Function to convert user input into row/column
-function convert_guess(coordinate) {
-  const row = parseInt(coordinate[1]) - 1; // Row is the number (A-J => 1-10)
-  const col = coordinate[0].toLowerCase().charCodeAt(0) - 97; // Column is the letter (A-J => 0-9)
-  return [row, col];
+  shotSound = loadSound("assets/gunFire.mp3"); // Preload sound but don't play it yet
 }
 
-// Function to check if the guess is a hit or miss
-function check_guess(coordinate) {
-  const [row, col] = coordinate;
-  if (gameBoard[row][col] == 0) {
-    gameBoard[row][col] = 2; // Miss
-  } else if (gameBoard[row][col] == 1) {
-    gameBoard[row][col] = 3; // Hit
+class Ship {
+  constructor(x, y, name, dir, length, img) {
+    this.initialX = x;
+    this.initialY = y;
+    this.x = x;
+    this.y = y;
+    this.name = name;
+    this.dir = dir;
+    this.length = length;
+    this.place = false;
+    this.hitboxes = [];
+    this.img = img;
+    this.isDragging = false;
   }
-}
 
-// Function to place a random ship
-function random_ship() {
-  let shipLength = 3; // Length of the ship
-  
-  // Randomize ship placement
-  let isHorizontal = Math.random() >= 0.5;
-  
-  if (isHorizontal) {
-    let row = Math.floor(Math.random() * 10);
-    let startCol = Math.floor(Math.random() * (10 - shipLength)); // Ensures the ship stays within bounds
-    for (let i = 0; i < shipLength; i++) {
-      gameBoard[row][startCol + i] = 1; // Place ship horizontally
-    }
-  } else {
-    let startRow = Math.floor(Math.random() * (10 - shipLength)); // Ensures the ship stays within bounds
-    let col = Math.floor(Math.random() * 10);
-    for (let i = 0; i < shipLength; i++) {
-      gameBoard[startRow + i][col] = 1; // Place ship vertically
+  display() {
+    this.drawShip();
+  }
+
+  drawShip() {
+    let shipWidth = this.dir === 0 ? this.length * TILE_SIZE : TILE_SIZE;
+    let shipHeight = this.dir === 0 ? TILE_SIZE : this.length * TILE_SIZE;
+    image(this.img, this.x, this.y, shipWidth, shipHeight);
+  }
+
+  isMouseOver() {
+    let shipWidth = this.dir === 0 ? this.length * TILE_SIZE : TILE_SIZE;
+    let shipHeight = this.dir === 0 ? TILE_SIZE : this.length * TILE_SIZE;
+    return mouseX >= this.x && mouseX <= this.x + shipWidth &&
+           mouseY >= this.y && mouseY <= this.y + shipHeight;
+  }
+
+  startDragging() {
+    this.isDragging = true;
+    this.offsetX = mouseX - this.x;
+    this.offsetY = mouseY - this.y;
+  }
+
+  drag() {
+    if (this.isDragging) {
+      this.x = mouseX - this.offsetX;
+      this.y = mouseY - this.offsetY;
     }
   }
-}
 
-// Function to handle user input
-function handle_input() {
-  let guess = input.value().toUpperCase().trim(); // Get the guess from the input field
-  if (guess.length >= 2) {
-    let [row, col] = convert_guess(guess);
-    check_guess([row, col]);
-    input.value(''); // Clear the input field
+  stopDragging() {
+    this.isDragging = false;
+  }
+
+  resetPosition() {
+    this.x = this.initialX;
+    this.y = this.initialY;
   }
 }
 
-// Function to draw the game grid
-function draw_grid() {
-  let colLabels = "ABCDEFGHIJ";
-  let rowLabels = "0123456789";
-  
-  // Draw column labels (A-J)
-  for (let i = 0; i < colLabels.length; i++) {
-    text(colLabels.charAt(i), i * 40 + 75, 40);
-  }
-
-  // Draw row labels (1-10)
-  for (let j = 0; j < rowLabels.length; j++) {
-    text(rowLabels.charAt(j), 40, j * 40 + 75);
-  }
-
-  // Draw grid cells
-  for (let i = 0; i < 10; i++) {
-    for (let j = 0; j < 10; j++) {
-      // Missed guess
-      if (gameBoard[i][j] == 2) {
-        fill("grey");
-      }
-      // Hit guess
-      else if (gameBoard[i][j] == 3) {
-        fill("red");
-      }
-      // Un-guessed
-      else {
-        fill(200, 200, 200);
-      }
-      
-      rect(j * 40 + 50, i * 40 + 50, 40, 40);
-    }
-  }
+function loadShips() {
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY, "Carrier", 0, 5, carrier));
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 1, "Battleship", 0, 4, battleship));
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 2, "Cruiser", 0, 3, cruiser));
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 3, "Destroyer", 0, 2, destroyer));
+  playerShips.push(new Ship(shipDisplayX, shipDisplayY + TILE_SIZE * 4, "Patrol", 0, 2, patrol));
 }
 
-// Setup function
 function setup() {
-  createCanvas(500, 500);
-  input = createInput();
-  input.position(150, 480);
-  
-  submitButton = createButton("FIRE!");
-  submitButton.position(350, 480);
-  submitButton.mousePressed(handle_input);
-  
-  // Set the ships on the board
-  random_ship();
-  isReady = true;
+  createCanvas(1600, 800); 
+  for (let row = 0; row < ROWS; row++) {
+    playerGrid[row] = [];
+    aiGrid[row] = [];
+    for (let col = 0; col < COLS; col++) {
+      playerGrid[row][col] = 0;
+      aiGrid[row][col] = 0;
+    }
+  }
+
+  loadShips();
 }
 
-// Draw function
 function draw() {
   background(255);
-  
-  // Draw the grid
-  draw_grid();
-  
-  // Show "Ready" indicator if ships are placed
-  if (isReady) {
-    fill("green");
-    textSize(20);
-    text("Ready", 150, 470);
+
+  if (state === 'title') {
+    renderTitleScreen();
+  } else if (state === 'placeShips') {
+    renderBoard(playerGrid, playerBoardX, playerBoardY);
+    renderBoard(aiGrid, aiBoardX, aiBoardY);
+    displayShips();
+    determineActiveSquare();
+    selectionOverlay();
+  } else if (state === 'firing'){
+    renderBoard(playerGrid, playerBoardX, playerBoardY);
+    renderBoard(aiGrid, aiBoardX, aiBoardY);
+    displayShips();
   }
-  
-  stroke(49, 53, 107);
-  fill("black");
 }
+
+function displayShips() {
+  for (let i = 0; i < playerShips.length; i++) {
+    let s = playerShips[i];
+    s.display();
+  }
+}
+
+function mousePressed() {
+  if (state === "placeShips") {
+    for (let ship of playerShips) {
+      if (ship.isMouseOver()) {
+        ship.startDragging();
+        break;
+      }
+    }
+  }
+}
+
+function mouseDragged() {
+  for (let ship of playerShips) {
+    if (ship.isDragging) {
+      ship.drag();
+    }
+  }
+}
+
+function mouseReleased() {
+  for (let ship of playerShips) {
+    if (ship.isDragging) {
+      ship.stopDragging();
+      let gridX = int((ship.x - playerBoardX) / TILE_SIZE);
+      let gridY = int((ship.y - playerBoardY) / TILE_SIZE);
+
+      if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS &&
+          canPlaceShip(playerGrid, gridY, gridX, ship.dir, ship.length)) {
+        ship.x = playerBoardX + gridX * TILE_SIZE;
+        ship.y = playerBoardY + gridY * TILE_SIZE;
+        ship.place = true; // Mark the ship as placed on the board
+
+        for (let i = 0; i < ship.length; i++) {
+          if (ship.dir === 0) playerGrid[gridY][gridX + i] = 0; // Horizontal placement
+          else playerGrid[gridY + i][gridX] = 0; // Vertical placement
+        }
+      } else {
+        ship.resetPosition(); // Reset to initial position if invalid placement
+      }
+    }
+  }
+  placeAIShips();
+}
+
+function renderTitleScreen() {
+  image(titleImage, 0, 0, width, height);
+}
+
+function renderBoard(grid, xOffset, yOffset) {
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      fill(220);
+      stroke(0);
+
+      if (grid[row][col] === 1) {
+        fill(100);
+      } else if (grid[row][col] === 2) {
+        fill(255, 0, 0);
+      } else if (grid[row][col] === 3) {
+        fill(0, 0, 255);
+      }
+
+      image(gameTile, xOffset + col * TILE_SIZE, yOffset + row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+    }
+  }
+}
+
+function selectionOverlay() {
+  noStroke();
+  
+  if (currentRow >= 0 && currentRow < ROWS && currentCol >= 0 && currentCol < COLS) {
+    let overlayColor = color(0, 255, 0, 150); // Default green (valid spot)
+    
+    if (isMouseOverShip(currentRow, currentCol)) {
+      overlayColor = color(169, 169, 169, 150);  // Grey when over a ship
+    } 
+    else if (isOneSquareAwayFromShip(currentRow, currentCol)) {
+      overlayColor = color(0, 0, 255, 150);  // Blue when one square away
+    }
+
+    fill(overlayColor);
+    rect(playerBoardX + currentCol * TILE_SIZE, playerBoardY + currentRow * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+  }
+}
+
+function isMouseOverShip(row, col) {
+  for (let ship of playerShips) {
+    let shipWidth = ship.dir === 0 ? ship.length * TILE_SIZE : TILE_SIZE;
+    let shipHeight = ship.dir === 0 ? TILE_SIZE : ship.length * TILE_SIZE;
+
+    if (mouseX >= ship.x && mouseX <= ship.x + shipWidth &&
+        mouseY >= ship.y && mouseY <= ship.y + shipHeight) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isOneSquareAwayFromShip(row, col) {
+  for (let ship of playerShips) {
+    let shipWidth = ship.dir === 0 ? ship.length * TILE_SIZE : TILE_SIZE;
+    let shipHeight = ship.dir === 0 ? TILE_SIZE : ship.length * TILE_SIZE;
+
+    for (let i = 0; i < ship.length; i++) {
+      let shipX = ship.x + (ship.dir === 0 ? i * TILE_SIZE : 0);
+      let shipY = ship.y + (ship.dir === 1 ? i * TILE_SIZE : 0);
+
+      if (
+        (abs(shipX - (playerBoardX + col * TILE_SIZE)) === TILE_SIZE && shipY === playerBoardY + row * TILE_SIZE) ||
+        (abs(shipY - (playerBoardY + row * TILE_SIZE)) === TILE_SIZE && shipX === playerBoardX + col * TILE_SIZE)
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function determineActiveSquare() {
+  if (mouseX >= playerBoardX && mouseX < playerBoardX + COLS * TILE_SIZE &&
+    mouseY >= playerBoardY && mouseY < playerBoardY + ROWS * TILE_SIZE) {
+    currentCol = int((mouseX - playerBoardX) / TILE_SIZE);
+    currentRow = int((mouseY - playerBoardY) / TILE_SIZE);
+  } else {
+    currentCol = -1;
+    currentRow = -1;
+  }
+  console.log(currentRow, currentCol);
+}
+
+function keyPressed() {
+  if (keyCode === ENTER) {
+    if (state === 'title') {
+      // Transition to the ship placement phase from the title screen
+      state = 'placeShips';
+    }
+      if (isAllShipsPlaced()) {
+      // Add any logic here for firing phase, if required
+      console.log("Entering the firing stage...")
+      state = 'firing'
+      
+    }else{
+      console.log("Please place all ships before entering the firing stage!");
+      state = 'placeShips';
+    }
+  }
+}
+
+
+function isAllShipsPlaced() {
+  return playerShips.every(ship => ship.place);
+}
+
+function canPlaceShip(grid, row, col, dir, length) {
+  if (dir === 0) { // Horizontal placement
+    if (col + length > COLS) return false; // Ship exceeds the grid width
+    for (let i = 0; i < length; i++) {
+      if (grid[row][col + i] !== 0) return false; // Overlaps another ship
+    }
+  } else { // Vertical placement
+    if (row + length > ROWS) return false; // Ship exceeds the grid height
+    for (let i = 0; i < length; i++) {
+      if (grid[row + i][col] !== 0) return false; // Overlaps another ship
+    }
+  }
+  return true;
+}
+
+function placeAIShips() {
+  AIShips = [
+    new Ship(0, 0, "Carrier", 0, 5, carrier),
+    new Ship(0, 0, "Battleship", 0, 4, battleship),
+    new Ship(0, 0, "Cruiser", 0, 3, cruiser),
+    new Ship(0, 0, "Destroyer", 0, 2, destroyer),
+    new Ship(0, 0, "Patrol", 0, 2, patrol),
+  ];
+
+  for (let ship of AIShips) {
+    let placed = false;
+    while (!placed) {
+      let startRow = int(random(0, ROWS));
+      let startCol = int(random(0, COLS));
+      let dir = 0; // Force horizontal placement
+
+      placed = canPlaceShip(aiGrid, startRow, startCol, dir, ship.length);
+
+      if (placed) {
+        for (let i = 0; i < ship.length; i++) {
+          aiGrid[startRow][startCol + i] = 1; // Place horizontally
+        }
+        ship.row = startRow;
+        ship.col = startCol;
+        ship.dir = dir; // Ensure the direction is saved as horizontal
+        ship.place = true;
+      }
+    }
+    if (!placed) {
+      console.error("AI ships were not placed correctly. Retrying...");
+      placeAIShips(); // Retry placement if necessary
+    }
+  }
+}
+
+function firingOverlay(){
+  
+}
+//----------------------------------------------------------------------------------
