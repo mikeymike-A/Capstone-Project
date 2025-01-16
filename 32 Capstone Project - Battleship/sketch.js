@@ -133,6 +133,7 @@ function draw() {
     displayShips();
     determineActiveSquare();
     selectionOverlay();
+
   }
   
   
@@ -176,23 +177,23 @@ function mouseReleased() {
       let gridX = int((ship.x - playerBoardX) / TILE_SIZE);
       let gridY = int((ship.y - playerBoardY) / TILE_SIZE);
 
-      if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS) {
+      if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS &&
+          canPlaceShip(playerGrid, gridY, gridX, ship.dir, ship.length)) {
         ship.x = playerBoardX + gridX * TILE_SIZE;
         ship.y = playerBoardY + gridY * TILE_SIZE;
+        ship.place = true; // Mark the ship as placed on the board
+
         for (let i = 0; i < ship.length; i++) {
-          if (ship.dir === 0) {
-            playerGrid[gridY][gridX + i] = 1;
-          } else {
-            playerGrid[gridY + i][gridX] = 1;
-          }
+          if (ship.dir === 0) playerGrid[gridY][gridX + i] = 0; // Horizontal placement
+          else playerGrid[gridY + i][gridX] = 0; // Vertical placement
         }
       } else {
-        ship.resetPosition(); // Reset position if out of bounds
+        ship.resetPosition(); // Reset to initial position if invalid placement
       }
     }
   }
+  placeAIShips();
 }
-
 function renderTitleScreen() {
   image(titleImage, 0, 0, width, height);
 
@@ -285,3 +286,54 @@ function keyPressed() {
   }
 }
 
+function isAllShipsPlaced() {
+  return playerShips.every(ship => ship.place);
+}
+
+
+function canPlaceShip(grid, row, col, dir, length) {
+  if (dir === 0) { // Horizontal placement
+    if (col + length > COLS) return false; // Ship exceeds the grid width
+    for (let i = 0; i < length; i++) {
+      if (grid[row][col + i] !== 0) return false; // Overlaps another ship
+    }
+  } else { // Vertical placement
+    if (row + length > ROWS) return false; // Ship exceeds the grid height
+    for (let i = 0; i < length; i++) {
+      if (grid[row + i][col] !== 0) return false; // Overlaps another ship
+    }
+  }
+  return true;
+}
+
+
+function placeAIShips() {
+  AIShips = [
+    new Ship(0, 0, "Carrier", 0, 5, carrier),
+    new Ship(0, 0, "Battleship", 0, 4, battleship),
+    new Ship(0, 0, "Cruiser", 0, 3, cruiser),
+    new Ship(0, 0, "Destroyer", 0, 2, destroyer),
+    new Ship(0, 0, "Patrol", 0, 2, patrol),
+  ];
+
+  for (let ship of AIShips) {
+    let placed = false;
+    while (!placed) {
+      let startRow = int(random(0, ROWS));
+      let startCol = int(random(0, COLS));
+      let dir = 0; // Force horizontal placement
+
+      placed = canPlaceShip(aiGrid, startRow, startCol, dir, ship.length);
+
+      if (placed) {
+        for (let i = 0; i < ship.length; i++) {
+          aiGrid[startRow][startCol + i] = 1; // Place horizontally
+        }
+        ship.row = startRow;
+        ship.col = startCol;
+        ship.dir = dir; // Ensure the direction is saved as horizontal
+        ship.place = true;
+      }
+    }
+  }
+}
