@@ -124,7 +124,7 @@ function draw() {
     renderBoard(playerGrid, playerBoardX, playerBoardY);
     renderBoard(aiGrid, aiBoardX, aiBoardY);
     displayShips();
-    determineActiveSquare();
+    determineActiveSquarePlacement();
     selectionOverlay();
   } else if (state === 'firing'){
     renderBoard(playerGrid, playerBoardX, playerBoardY);
@@ -258,7 +258,7 @@ function isOneSquareAwayFromShip(row, col) {
   return false;
 }
 
-function determineActiveSquare() {
+function determineActiveSquarePlacement() {
   if (mouseX >= playerBoardX && mouseX < playerBoardX + COLS * TILE_SIZE &&
     mouseY >= playerBoardY && mouseY < playerBoardY + ROWS * TILE_SIZE) {
     currentCol = int((mouseX - playerBoardX) / TILE_SIZE);
@@ -266,7 +266,9 @@ function determineActiveSquare() {
   } else {
     currentCol = -1;
     currentRow = -1;
+
   }
+  
   console.log(currentRow, currentCol);
 }
 
@@ -280,7 +282,10 @@ function keyPressed() {
       // Add any logic here for firing phase, if required
       console.log("Entering the firing stage...")
       state = 'firing'
-      
+      renderBoard(playerGrid, playerBoardX, playerBoardY);
+      renderBoard(aiGrid, aiBoardX, aiBoardY);
+      displayShips();
+      determineActiveFiringSquare();
     }else{
       console.log("Please place all ships before entering the firing stage!");
       state = 'placeShips';
@@ -343,7 +348,42 @@ function placeAIShips() {
   }
 }
 
-function firingOverlay(){
-  
+function determineActiveFiringSquare() {
+  // Check if the mouse is within the Player board boundaries
+  if (mouseX >= playerBoardX && mouseX < playerBoardX + COLS * TILE_SIZE &&
+      mouseY >= playerBoardY && mouseY < playerBoardY + ROWS * TILE_SIZE) {
+    currentCol = int((mouseX - playerBoardX) / TILE_SIZE);
+    currentRow = int((mouseY - playerBoardY) / TILE_SIZE);
+    console.log(`Invalid Target on Player Board: Row ${currentRow}, Col ${currentCol}`);
+    // You can add logic here to render a "red overlay" for invalid targeting
+    renderInvalidOverlay(currentRow, currentCol, playerBoardX, playerBoardY);
+  }
+  // Check if the mouse is within the AI board boundaries
+  else if (mouseX >= aiBoardX && mouseX < aiBoardX + COLS * TILE_SIZE &&
+           mouseY >= aiBoardY && mouseY < aiBoardY + ROWS * TILE_SIZE) {
+    currentCol = int((mouseX - aiBoardX) / TILE_SIZE);
+    currentRow = int((mouseY - aiBoardY) / TILE_SIZE);
+    console.log(`Targeting AI Board: Row ${currentRow}, Col ${currentCol}`);
+    // You can add logic here to render a "valid overlay" for targeting
+    renderValidOverlay(currentRow, currentCol, aiBoardX, aiBoardY);
+  } 
+  // Mouse is outside both boards
+  else {
+    currentRow = -1; // Reset if out of bounds
+    currentCol = -1;
+    console.log("Mouse is outside any board.");
+  }
 }
+function renderValidOverlay(row, col, boardX, boardY) {
+  noFill();
+  stroke(0, 255, 0); // Green outline
+  rect(boardX + col * TILE_SIZE, boardY + row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+}
+
+function renderInvalidOverlay(row, col, boardX, boardY) {
+  noFill();
+  stroke(255, 0, 0); // Red outline
+  rect(boardX + col * TILE_SIZE, boardY + row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+}
+
 //----------------------------------------------------------------------------------
