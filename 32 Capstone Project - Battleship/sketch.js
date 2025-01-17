@@ -130,6 +130,7 @@ function draw() {
     renderBoard(playerGrid, playerBoardX, playerBoardY);
     renderBoard(aiGrid, aiBoardX, aiBoardY);
     displayShips();
+    determineActiveFiringSquare();
   }
 }
 
@@ -148,8 +149,40 @@ function mousePressed() {
         break;
       }
     }
+  } else if (state === "firing") {
+    // Ensure mouse is within AI board bounds
+    if (mouseX >= aiBoardX && mouseX < aiBoardX + COLS * TILE_SIZE &&
+        mouseY >= aiBoardY && mouseY < aiBoardY + ROWS * TILE_SIZE) {
+      
+      // Calculate row and col
+      let col = int((mouseX - aiBoardX) / TILE_SIZE);
+      let row = int((mouseY - aiBoardY) / TILE_SIZE);
+
+      // Debugging logs
+      console.log(`Mouse position: (${mouseX}, ${mouseY}), Row: ${row}, Col: ${col}`);
+      
+      // Check bounds
+      if (row >= 0 && row < ROWS && col >= 0 && col < COLS) {
+        let value = aiGrid[row][col];
+
+        console.log(`Clicked tile value: ${value}`);
+        // Check the value and update the game state
+        if (value === 0) {
+          console.log("Miss!");
+          
+          aiGrid[row][col] = color(255,255,255);
+        } else if (value === 1) {
+          
+          aiGrid[row][col] = color(255,0,0);
+        }
+      } else {
+        console.log("Clicked outside the grid bounds.");
+      }
+    }
   }
 }
+
+
 
 function mouseDragged() {
   for (let ship of playerShips) {
@@ -268,8 +301,6 @@ function determineActiveSquarePlacement() {
     currentRow = -1;
 
   }
-  
-  console.log(currentRow, currentCol);
 }
 
 function keyPressed() {
@@ -349,41 +380,25 @@ function placeAIShips() {
 }
 
 function determineActiveFiringSquare() {
-  // Check if the mouse is within the Player board boundaries
+  noStroke();
   if (mouseX >= playerBoardX && mouseX < playerBoardX + COLS * TILE_SIZE &&
-      mouseY >= playerBoardY && mouseY < playerBoardY + ROWS * TILE_SIZE) {
+    mouseY >= playerBoardY && mouseY < playerBoardY + ROWS * TILE_SIZE) {
     currentCol = int((mouseX - playerBoardX) / TILE_SIZE);
     currentRow = int((mouseY - playerBoardY) / TILE_SIZE);
-    console.log(`Invalid Target on Player Board: Row ${currentRow}, Col ${currentCol}`);
-    // You can add logic here to render a "red overlay" for invalid targeting
-    renderInvalidOverlay(currentRow, currentCol, playerBoardX, playerBoardY);
-  }
-  // Check if the mouse is within the AI board boundaries
-  else if (mouseX >= aiBoardX && mouseX < aiBoardX + COLS * TILE_SIZE &&
-           mouseY >= aiBoardY && mouseY < aiBoardY + ROWS * TILE_SIZE) {
-    currentCol = int((mouseX - aiBoardX) / TILE_SIZE);
-    currentRow = int((mouseY - aiBoardY) / TILE_SIZE);
-    console.log(`Targeting AI Board: Row ${currentRow}, Col ${currentCol}`);
-    // You can add logic here to render a "valid overlay" for targeting
-    renderValidOverlay(currentRow, currentCol, aiBoardX, aiBoardY);
-  } 
-  // Mouse is outside both boards
-  else {
-    currentRow = -1; // Reset if out of bounds
-    currentCol = -1;
-    console.log("Mouse is outside any board.");
-  }
-}
-function renderValidOverlay(row, col, boardX, boardY) {
-  noFill();
-  stroke(0, 255, 0); // Green outline
-  rect(boardX + col * TILE_SIZE, boardY + row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-}
-
-function renderInvalidOverlay(row, col, boardX, boardY) {
-  noFill();
-  stroke(255, 0, 0); // Red outline
-  rect(boardX + col * TILE_SIZE, boardY + row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+    overlayColor = color(169, 169, 169, 150);
+    fill(overlayColor);
+    rect(playerBoardX + currentCol * TILE_SIZE, playerBoardY + currentRow * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+    
+  } else if(mouseX >= aiBoardX && mouseX < aiBoardX + COLS * TILE_SIZE &&
+    mouseY >= aiBoardY && mouseY < aiBoardY + ROWS * TILE_SIZE){
+      currentCol = int((mouseX - aiBoardX) / TILE_SIZE);
+      currentRow = int((mouseY - aiBoardY) / TILE_SIZE);
+      overlayColor = color(255,0,0, 150);
+      fill(overlayColor);
+      rect(aiBoardX + currentCol * TILE_SIZE, aiBoardY + currentRow * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+      
+    }
+    
 }
 
 //----------------------------------------------------------------------------------
